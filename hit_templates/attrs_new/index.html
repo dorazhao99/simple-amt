@@ -91,6 +91,7 @@ const {
     FormLabel,
     FormControl,
     FormControlLabel,
+    FormHelperText,
     FormGroup,
     Checkbox,
     Radio,
@@ -101,7 +102,82 @@ const {
 const attrs = {gender: ['Male', 'Female', 'Unsure'],
                skin: ['1', '2', '3', '4', '5', '6', 'Unsure']
              };
+class DemographyQuiz extends React.Component
+{
+  constructor(props) {
+    super(props);
+    this.state = {
+      gender: 'female',
+      race: [],
+      page: 0
+    }
+    this.handleGender = this.handleGender.bind(this);
+    this.handleRace = this.handleRace.bind(this);
+  }
 
+  next_page() {
+    this.setState({page: this.state.page + 1})
+  }
+
+  handleGender = (event) => {
+    this.setState({gender: event.target.value})
+  }
+
+  handleRace = (event) => {
+    const race = event.target.value;
+    let newRace = this.state.race
+    const index = newRace.indexOf(race);
+    if (index > -1) {
+      newRace.splice(index, 1);
+    } else {
+      newRace.push(race);
+    }
+    this.setState({race: newRace});
+  }
+
+  render()
+  {
+    const errorGender = this.state.gender === null;
+    const errorRace = this.state.race.length === 0;
+    return(
+      <Container>
+        <FormControl>
+          <FormLabel component="legend">Gender</FormLabel>
+            <RadioGroup aria-label="gender" name="gender1" value={this.state.gender} onChange={this.handleGender}>
+              <FormControlLabel value={"female"} control={<Radio />} label="Female" />
+              <FormControlLabel value={"male"} control={<Radio />} label="Male" />
+              <FormControlLabel value={"other"} control={<Radio />} label="Other" />
+            </RadioGroup>
+          {errorGender ? <FormHelperText>You can display an error</FormHelperText> : null}
+        </FormControl>
+        <FormControl>
+          <FormLabel component="legend">Race</FormLabel>
+            <FormGroup aria-label="race" name="race1" value={this.state.race}>
+              <FormControlLabel
+                control={<Checkbox checked={this.state.race.includes("white") ? true : false} onChange={this.handleRace} value="white"/>}
+                label="White (non-Hispanic or Latinx)"
+              />
+              <FormControlLabel
+                control={<Checkbox checked={this.state.race.includes("black") ? true : false} onChange={this.handleRace} value="black" />}
+                label="Black"
+              />
+              <FormControlLabel
+                control={<Checkbox checked={this.state.race.includes("asian") ? true : false} onChange={this.handleRace} value="asian" />}
+                label="Asian or Pacific Islander"
+              />
+              <FormControlLabel
+                control={<Checkbox checked={this.state.race.includes("latinx") ? true : false} onChange={this.handleRace} value="latinx" />}
+                label="Hispanic or Latinx"
+              />
+            </FormGroup>
+        </FormControl>
+        <Button onClick={this.next_page.bind(this)}>
+          Submit
+        </Button>
+      </Container>
+    );
+  }
+}
 class TabPanel extends React.Component
 {
     constructor(props)
@@ -272,7 +348,7 @@ class App extends React.Component
                 skin: [],
             })),
             completed: this.input_data.map(() => false),
-            beginTask: true
+            beginTask: false,
         };
         this.time = [];
 
@@ -494,7 +570,7 @@ class App extends React.Component
                   />
               )) : (
                 <div>
-                  Hello World
+                  <DemographyQuiz/>
                 </div>
               )
             }
