@@ -123,24 +123,17 @@ class TabPanel extends React.Component
                           </Typography>
                           <ol>
                               <li><Typography variant="body1" gutterBottom>
-                                  Click on the <strong>faces of all targets</strong> in the image.
-                                  Include only the people who look like the targets. Do not click on people without any visual evidence.
-                                  Ignore the people that are too small or in the background</Typography></li>
+                                  Enter the gender and skin color information for the person in the bounding box.
+                                  If the person is too small or unclear, mark "Unsure". </Typography></li>
                               <li><Typography variant="body1" gutterBottom>
-                                  Click "CONFIRM" to enter the gender, skin, and age information of the targets.
-                                  When there is no target in the image, click "CONFIRM NO TARGET".
+                                  Click "NEXT" to move onto the next HIT. You must submit
+                                  an answer to both questions per image otherwise
+                                  you will not be able to proceed.
                                   </Typography></li>
                               <li><Typography variant="body1" gutterBottom>
                                   There are 10 questions per HIT.
                                   </Typography></li>
                           </ol>
-                          <Typography variant="body1" gutterBottom>
-                              <strong>Keyboard Shortcuts</strong>
-                          </Typography>
-                          <ul>
-                              <li><Typography variant="body1" gutterBottom>&#8592; and &#8594; for navigating between questions</Typography></li>
-                              <li><Typography variant="body1" gutterBottom>ENTER or SPACE for confirm</Typography></li>
-                          </ul>
                         </div>
                     </Grid>
                     <Grid item xs={6}>
@@ -273,13 +266,13 @@ class App extends React.Component
               race: null,
               gender: null,
               location: null,
-            }
+            },
             labels: this.input_data.map(() => ({
                 gender: [],
                 skin: [],
             })),
             completed: this.input_data.map(() => false),
-            beginTask: false,
+            beginTask: true
         };
         this.time = [];
 
@@ -484,12 +477,6 @@ class App extends React.Component
     //         $(document.documentElement).unbind('keyup', this.keyboard_handler);
     //     }
     // }
-    demographyQuiz() {
-      return(
-        <div>
-        </div>
-      )
-    }
 
     render()
     {
@@ -516,11 +503,12 @@ class App extends React.Component
                       labels={this.state.labels[idx]}
                       check_label={this.handle_check_label.bind(this, idx)}
                   />
-              ) : (
+              )) : (
                 <div>
+                  Hello World
                 </div>
               )
-            )}
+            }
           </div>
         );
     }
