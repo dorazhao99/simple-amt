@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>My page</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no" />
+        <script src="https://unpkg.com/react@latest/umd/react.development.js" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/react-dom@latest/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/@material-ui/core@latest/umd/material-ui.development.js" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/babel-standalone@latest/babel.min.js" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/jquery@3.4.1/dist/jquery.min.js" crossorigin="anonymous"></script>
+        <!-- Fonts to support Material Design -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+        <!-- Icons to support Material Design -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+        <style>
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+        </style>
+    </head>
+
+    <!-- simpleamt.html -->
+    <script type='text/json' id='input'>
+        {{ input }}
+    </script>
+    <form id='results-form' method='post' action='dummy' class='text-center'>
+        <input type='hidden' value='' name='assignmentId' id='assignmentId'/>
+        <input type='hidden' value='' name='output' id='output'/>
+        <input type='submit' class='btn btn-lg btn-success' id='submit-btn' value='Submit' disabled hidden />
+    </form>
+
+    <body>
+        <div id="root"></div>
+
+        <script type="text/babel">
+
+const {
+    AppBar,
+    Tabs,
+    Tab,
+    Typography,
+    Container,
+    Card,
+    CardContent,
+    Button,
+    FormLabel,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
+    Checkbox,
+    Radio,
+    RadioGroup,
+    Grid,
+} = MaterialUI;
+
+const attrs = {gender: ['Male', 'Female', 'Unsure'],
+               skin: ['1', '2', '3', '4', '5', '6', 'Unsure']
+             };
+
+class TabPanel extends React.Component
+{
+    constructor(props)
+    {
+        super(props);
+    }
+
+    render()
+    {
+        if (this.props.value === this.props.index)
+        {
+            return (
+              <Container>
+                <Grid container spacing={3}>
+                    <Grid item xs={6}>
+                        <div>
+                          <Typography variant="body1" gutterBottom>
+                              <strong>Instructions</strong>
+                          </Typography>
+                          <ol>
+                              <li><Typography variant="body1" gutterBottom>
+                                  Click on the <strong>faces of all targets</strong> in the image.
+                                  Include only the people who look like the targets. Do not click on people without any visual evidence.
+                                  Ignore the people that are too small or in the background</Typography></li>
+                              <li><Typography variant="body1" gutterBottom>
+                                  Click "CONFIRM" to enter the gender, skin, and age information of the targets.
+                                  When there is no target in the image, click "CONFIRM NO TARGET".
+                                  </Typography></li>
+                              <li><Typography variant="body1" gutterBottom>
+                                  There are 10 questions per HIT.
+                                  </Typography></li>
+                          </ol>
+                          <Typography variant="body1" gutterBottom>
+                              <strong>Keyboard Shortcuts</strong>
+                          </Typography>
+                          <ul>
+                              <li><Typography variant="body1" gutterBottom>&#8592; and &#8594; for navigating between questions</Typography></li>
+                              <li><Typography variant="body1" gutterBottom>ENTER or SPACE for confirm</Typography></li>
+                          </ul>
+                        </div>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <img src={this.props.url}/>
+                    </Grid>
+                </Grid>
+                { Object.keys(attrs).map((k, idx) => {
+                    return (
+                      <FormControl key={k} fullWidth={true}>
+                        <FormGroup row={true}>
+                        { attrs[k].map(lbl =>
+                          <div key={lbl}>
+                            <FormControlLabel
+                              control={
+                                <Radio
+                                  checked={this.props.labels[k].includes(lbl)}
+                                  onChange={() => this.props.check_label(k, lbl)}
+                                  value={lbl}
+                                />
+                              }
+                              label={lbl}
+                             />
+                            <img src={`https://imgamtserv.cs.princeton.edu/examples/${lbl}.jpg`}
+                              alt={lbl}
+                              onClick={() => this.props.check_label(k, lbl)} />
+                          </div>
+                        )}
+                       </FormGroup>
+                      </FormControl>
+                    );
+                  }
+                )}
+              <Button onClick={this.props.prev.bind(this)} color="primary">
+                  Previous
+              </Button>
+              <Button onClick={this.props.next.bind(this)} color="primary">
+                  Next
+              </Button>
+              </Container>
+          );
+        } else
+        {
+            return <div></div>;
+        }
+    }
+}
+
+
+class SimpleAMT
+{
+    get_url_param(name)
+    {
+        const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+        return match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : null;
+    }
+
+
+    get_input(default_input)
+    {
+        if (typeof(default_input) === 'undefined')
+        {
+            default_input = null;
+        }
+        try
+        {
+            return JSON.parse($('#input').html());
+        } catch (e)
+        {
+            return default_input;
+        }
+    }
+
+
+    set_output(output)
+    {
+        $('#output').val(JSON.stringify(output));
+    }
+
+    is_preview()
+    {
+        const assignment_id = this.get_url_param('assignmentId');
+        if (assignment_id === null)
+        {
+            return false;
+        }
+        return assignment_id === 'ASSIGNMENT_ID_NOT_AVAILABLE';
+    }
+
+    setup_submit()
+    {
+        const submit_to = this.get_url_param('turkSubmitTo');
+        $('#results-form').attr('action', submit_to + '/mturk/externalSubmit');
+        $('#assignmentId').val(this.get_url_param('assignmentId'));
+    }
+
+}
+
+
+class App extends React.Component
+{
+    constructor(props)
+    {
+        super(props)
+
+        const SAMPLE_INPUT = [
+            {"image_url": "https://picsum.photos/id/237/200/300", "synset": "medical practitioner, medical man", "gloss": "someone who practices medicine", "gt": {"gender": ["male"], "skin": ["light"], "age": ["adult"]}},
+            {"image_url": "https://imgamtserv.cs.princeton.edu/n10780632/n10780632_24471.JPEG", "synset": "wife, married woman", "gloss": "a married woman; a man's partner in marriage", "gt": null},
+            {"image_url": "https://imgamtserv.cs.princeton.edu/n10521662/n10521662_7387.JPEG", "synset": "reporter, newsman, newsperson", "gloss": "a person who investigates and reports or edits news stories", "gt": null},
+            {"image_url": "https://imgamtserv.cs.princeton.edu/n09913593/n09913593_6229.JPEG", "synset": "cheerleader", "gloss": "an enthusiastic and vocal supporter; \"he has become a cheerleader for therapeutic cloning\"", "gt": null},
+            {"image_url": "https://imgamtserv.cs.princeton.edu/n10147935/n10147935_29664.JPEG", "synset": "groom, bridegroom", "gloss": "a man who has recently been married", "gt": null},
+            {"image_url": "https://imgamtserv.cs.princeton.edu/n09618880/n09618880_3115.JPEG", "synset": "ex-president", "gloss": "a former president", "gt": null}, {"image_url": "https://imgamtserv.cs.princeton.edu/n10655594/n10655594_16783.JPEG", "synset": "steward, flight attendant", "gloss": "an attendant on an airplane", "gt": null},
+            {"image_url": "https://imgamtserv.cs.princeton.edu/n10333601/n10333601_4426.JPEG", "synset": "mother's daughter", "gloss": "a daughter who is favored by and similar to her mother", "gt": null},
+            {"image_url": "https://imgamtserv.cs.princeton.edu/n10348526/n10348526_3059.JPEG", "synset": "Navy SEAL, SEAL", "gloss": "a member of a Naval Special Warfare unit who is trained for unconventional warfare; \"SEAL is an acronym for Sea Air and Land\"", "gt": null},
+            {"image_url": "https://imgamtserv.cs.princeton.edu/n10382710/n10382710_8784.JPEG", "synset": "organ-grinder", "gloss": "a street musician who plays a hand organ or hurdy-gurdy", "gt": null},];
+        this.simpleamt = new SimpleAMT();
+        this.input_data = this.simpleamt.get_input(SAMPLE_INPUT);
+        console.log(JSON.stringify(this.input_data));
+
+        const black_list = ['A1ZT0TLZZTT47M', 'A1QBWI26CXCCSS', 'AEFM07LE1ZMI6', 'A2KW17G25L25R8', 'A2M3UMU54O3G6J', 'A47E0Z3LTH37V', 'A35T6IAX6MHNHC', 'A1NQT28GZTFLGA', 'A2W1EIVLN6JCLC', 'A2NYKGHWR2TUIE', 'A3LPZVG62RNVL8', 'A1HNR6OIRFCEHS', 'AXP822O7QOTBB', 'A14L7ICRNLCAQY', 'AO4KFX0CY0SQD', 'A13WYZ8AXD6ODX', 'A1RQIKVC22VAFY', 'A34IENJ3GT0ZZE', 'A1IUX91LA3UUQ8', 'A222A32RQC1T37', 'AZE7YSINS9UNZ', 'AX2EWYWZM19AZ', 'ATMD452KBHND8', 'A3NOXFQNEWTIDF', 'A18J7H2QA7UQIR', 'AMGGLXGMFWEN2', 'A1G3XXI02ND2L9', 'A13STUE0VL42FA', 'A1H8AABW86LBCO', 'A33XO1M9DNX8Z9', 'A1CPLZSLNP0FI7', 'A23MM7CYGMG473', 'A13V13Y2DJGFT4', 'AD3176YJTD639', 'A31XFBQITA3FAP', 'A2ZFTBJPSQX1GB', 'A2TOWOPTMZQLGL', 'A2WF8GWD5PXIYA', 'A3HWIDZ2MRAKTX', 'A1JVUD5XUB9H48', 'A122PMN7S5SU33', 'A3BOLOMVZO0DFJ', 'A12YH2UTVOOEQ3', 'A2WVY1WO8EBV8V', 'AB293DRMAXFUT', 'AFH95KDAMP3HM', 'A139DFNZS0I9RB', 'A3C9Q2XDTZ3Y01', 'A1BUWYES83CDZR', 'A2UP6YF6L0WQE5', 'A34ZLZZ5NJPWJ4', 'A148AFRDCQRW8O', 'ATC53PJHYR7Q2', 'A6T7H70ZUFURS', 'A1GL98AM404FJW', 'A241AKX9OU8DC6', 'A28BX5XQI1CU6X', 'A1KNBX59Y582HK', 'A2KLDA6MCHVV4V', 'A1HWMTN7NNV4UA', 'AP34CPJY1CL0I', 'A2LXH22NMQ1ECA', 'A2N9QCS90MDZ4C', 'ADHJEWN49XD4M', 'AG2YM9OWQP690', 'AF93RMUF8O7H3', 'A3P9EYN08NPLG4', 'A1HZUVBB5NX00W', 'A3M0LH8L12FR9N', 'A1N3KUYWA8XWAV', 'A1VT3APNTC0Q80', 'AAABU3NPTCTAR', 'AYEPAYZQ9QZXR', 'A37MPHPHMGWFQB', 'A18S7VHZ6X4F93', 'A3KU0KWA1ZQ7WK', 'A2CR1GIBUQ88QM', 'A2UUT3XS4L80YU', 'A1QPS126EE16WP', 'A34SVP7NQ7MH17', 'A9E9L9MWEZOPN', 'A2VM7CXPB0M1JO', 'A3IVJ1LYCM2HJY', 'AO6I60SMTYC78', 'A2YE2C1F6WBL0G', 'A2SYRFHW6RWQNX', 'A27J8EOAZMU0RM', 'A3LMTT6HWAXKOK', 'A38MCQMAUI9DJL', 'A3FW9NWR6TJ4M9', 'A8YXRUN7KL0FB', 'A3K27VN3NJEV60', 'A20MZTV1AZYV9Z', 'A1F2ERPK4VA4VJ', 'A1R212A30YI8P5', 'ANHH3N0535YSN', 'A2JBNDG0U9IA6I', 'A2U7U0A4G92GTR', 'AWDSIX3ULD32V', 'A7150GR6HHY5D', 'A84SHOZ8RIITN', 'AXID3RPK6NZT6', 'A1ODWYF1SFY8DB', 'A6E3CRX8TM3X3', 'A5AUM0EVT5QZQ', 'A1KHJ8MO94KGI6', 'AMFSEYWXG0XS4', 'A3T3CRF61D218E', 'AMZ0U6W51DHNE', 'AU0OAXG9U0GQ7', 'A267H808C339ZQ', 'A2BB1A365DQRTJ', 'A2ILF5DLSOSZ4P', 'A2Y8WWVZVZBJES', 'A37I7D4GJ4H2H1', 'A11DVZZE26RU7O', 'A2LASUDS4NLOZW', 'A1B2FSW3O43R5E', 'AHCNB3U5FYB4N', 'A28SFTKTGBSD9', 'A3C12N7NMPX4VE', 'A2C8QIT0DJRCHN', 'A1L3VZLK8DCFNM', 'A2L6JHIJDE1F2X', 'A1PFE8T2LNWFLV', 'A8289AEOKHKV4', 'A1PJZGP5TDLW0Z', 'A2S5GHO2U54S7T', 'AP9WRGCJVLLTG', 'A2D41VIN7Y9B3D', 'A1JF9JUL432Z96', 'A18KBQ8MWVKA91', 'AZ1FVSE3Q101W', 'AJHQLOZH3W1II', 'AVQND8233HQWK', 'AEVLUVUOKMIBN', 'AEY83ANLGE6KR', 'A1OXHS6RUK0V3U', 'APYYV3B1MT2B6', 'A3BWTXXSBYT97H', ];
+        const workerId = this.simpleamt.get_url_param('workerId');
+        if (black_list.indexOf(workerId) !== -1)  // blocked worker
+        {
+            alert('No more HITs left. Please return this HIT.');
+            this.input_data = [];
+        }
+
+        this.state = {
+            active_panel_idx: 0,
+            annotator: {
+              race: null,
+              gender: null,
+              location: null,
+            }
+            labels: this.input_data.map(() => ({
+                gender: [],
+                skin: [],
+            })),
+            completed: this.input_data.map(() => false),
+            beginTask: false,
+        };
+        this.time = [];
+
+        // // -> and <- for navigating between panels
+        // this.keyboard_handler = (e => {
+        //     if (e.keyCode === 39)  // ->
+        //     {
+        //         this.next_panel();
+        //     } else if (e.keyCode === 37)  // <-
+        //     {
+        //         this.prev_panel();
+        //     }
+        // })
+        // $(document.documentElement).keyup(this.keyboard_handler);
+    }
+
+    reformat(annotations)
+    {
+        const keys = Object.keys(annotations);
+        const length = annotations[keys[0]].length;
+        Object.values(annotations).forEach(arr => {
+            console.assert(arr.length === length);
+        });
+        const results = [];
+        for (let i = 0; i < length; i++)
+        {
+            const obj = {};
+            for (let k of keys)
+            {
+                obj[k] = annotations[k][i];
+            }
+            results.push(obj);
+        }
+        return results;
+    }
+
+    check_gt(idx)
+    {
+        if (this.input_data[idx].gt === null)
+        {
+            return;
+        }
+        for (let k of Object.keys(attrs))
+        {
+            this.state.labels[idx][k].sort();
+            this.input_data[idx].gt[k].sort();
+            if (JSON.stringify(this.state.labels[idx][k]) != JSON.stringify(this.input_data[idx].gt[k]))
+            {
+                const your_answer = `You answer: ${JSON.stringify(this.state.labels[idx])}\n`;
+                let reference_answer = null;
+                if (this.input_data[idx].gt.gender.length === 0)  // no person
+                {
+                    reference_answer = `However, it is not obvious from the image that the person is a ${this.input_data[idx].synset}.`;
+                } else
+                {
+                    reference_answer = `The reference answer: ${JSON.stringify(this.input_data[idx].gt)}\n`;
+                }
+                alert(your_answer + reference_answer + 'You are not required to be always the same to the reference, but please ajust your labeling criterion to match the reference as close as possible.');
+                return;
+            }
+        }
+    }
+
+    sanity_check()  // some simple check of the results to submit
+    {
+        const no_person = this.state.labels.filter(lbs => lbs['gender'].length === 0 && lbs['skin'].length === 0 && lbs['age'].length === 0);
+        console.log(no_person);
+        if (no_person.length > this.input_data.length / 2)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    next_panel()
+    {
+        let isComplete = false;
+        let count = 0;
+        debugger;
+        Object.keys(this.state.labels[this.state.active_panel_idx]).forEach((lbl) => {
+          if (this.state.labels[this.state.active_panel_idx][lbl].length > 0) {
+            count += 1;
+          }
+        });
+
+        if (count === Object.keys(this.state.labels[this.state.active_panel_idx]).length) {
+          isComplete = true;
+        }
+
+
+        this.setState((state, _props) => {
+            if (!isComplete)
+            {
+                alert('Please complete the current question before proceeding to the next.');
+                return {};
+            }
+            if (state.active_panel_idx < this.input_data.length - 1)
+            {
+                // this.check_gt(state.active_panel_idx);
+                this.time.push((Date.now() - this.start_time) / 1000);
+                const updated_completed = state.completed.slice()
+                updated_completed[state.active_panel_idx] = true
+                return {active_panel_idx: state.active_panel_idx + 1, completed: updated_completed};
+            } else
+            {
+                // this.check_gt(state.active_panel_idx);
+                this.time.push((Date.now() - this.start_time) / 1000);
+                const annotations = JSON.parse(JSON.stringify(state));
+                delete annotations.completed;
+                delete annotations.active_panel_idx;
+                annotations.time = this.time;
+                const results = {'input': this.input_data, 'output': this.reformat(annotations)};
+                console.log(JSON.stringify(results));
+                this.simpleamt.set_output(results);
+                this.simpleamt.setup_submit();
+                if (!this.sanity_check())
+                {
+                    alert('There may be a problem with your answer, please return this HIT.');
+                } else if (!this.simpleamt.is_preview())
+                {
+                    $('#results-form').submit();
+                } else
+                {
+                    alert('Unable to submit in preview mode. Please accept the HIT.');
+                }
+                return {};
+            }
+        }, () => {
+            this.start_time = Date.now();
+        });
+    }
+
+
+    prev_panel()
+    {
+        this.setState((state, _props) => {
+            if (0 < state.active_panel_idx)
+            {
+                const updated_completed = state.completed.slice()
+                updated_completed[state.active_panel_idx - 1] = false;
+                return {active_panel_idx: state.active_panel_idx - 1, completed: updated_completed};
+            } else
+            {
+                return {};
+            }
+        });
+    }
+
+
+    switch_panel(_event, new_idx)
+    {
+        this.setState((state, _props) => {
+            if (new_idx > state.active_panel_idx && !state.completed[state.active_panel_idx])
+            {
+                alert('Please complete the current question before proceeding to the next.');
+                return {};
+            }
+            const updated_completed = state.completed.slice();
+            for (let i = new_idx; i < state.active_panel_idx; i++)
+            {
+                updated_completed[i] = false;
+            }
+            return {active_panel_idx: new_idx, completed: updated_completed};
+        });
+    }
+
+
+    handle_complete(idx)
+    {
+        this.setState((state, _props) => {
+            const updated_completed = state.completed.slice()
+            updated_completed[idx] = true;
+            return {completed: updated_completed};
+        }, () => this.next_panel());
+    }
+
+
+    handle_check_label(idx, attr, lbl)
+    {
+        this.setState((state, _props) => {
+            const updated_labels = state.labels.slice();
+            const i = updated_labels[idx][attr].indexOf(lbl)
+            if (i === -1)
+            {
+                updated_labels[idx][attr] = lbl;
+            } else
+            {
+                updated_labels[idx][attr].splice(i, 1);
+            }
+            return {labels: updated_labels};
+        });
+    }
+
+
+    // set_keyboard(enable)
+    // {
+    //     if (enable)
+    //     {
+    //         $(document.documentElement).keyup(this.keyboard_handler);
+    //     } else
+    //     {
+    //         $(document.documentElement).unbind('keyup', this.keyboard_handler);
+    //     }
+    // }
+    demographyQuiz() {
+      return(
+        <div>
+        </div>
+      )
+    }
+
+    render()
+    {
+        return (
+          <div className="App">
+            <AppBar position="static">
+              <Tabs
+                variant="fullWidth"
+                value={this.state.active_panel_idx}
+                onChange={this.switch_panel.bind(this)}>
+                { this.input_data.map((sample, idx) =>
+                    <Tab key={idx} label={idx + 1} />) }
+              </Tabs>
+              </AppBar>
+              {this.state.beginTask ? (
+                this.input_data.map((sample, idx) =>
+                  <TabPanel
+                      key={idx}
+                      value={this.state.active_panel_idx}
+                      index={idx}
+                      url={this.input_data[idx].image_url}
+                      next={this.next_panel.bind(this)}
+                      prev={this.prev_panel.bind(this)}
+                      labels={this.state.labels[idx]}
+                      check_label={this.handle_check_label.bind(this, idx)}
+                  />
+              ) : (
+                <div>
+                </div>
+              )
+            )}
+          </div>
+        );
+    }
+
+    componentDidMount()
+    {
+        this.start_time = Date.now();
+    }
+}
+
+
+ReactDOM.render(<App />, document.getElementById('root'));
+
+        </script>
+    </body>
+</html>
