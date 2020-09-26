@@ -135,45 +135,90 @@ class DemographyQuiz extends React.Component
     this.setState({race: newRace});
   }
 
+  submitTest = () => {
+
+  }
+  
   render()
   {
     const errorGender = this.state.gender === null;
     const errorRace = this.state.race.length === 0;
     return(
       <Container>
-        <FormControl>
-          <FormLabel component="legend">Gender</FormLabel>
-            <RadioGroup aria-label="gender" name="gender1" value={this.state.gender} onChange={this.handleGender}>
-              <FormControlLabel value={"female"} control={<Radio />} label="Female" />
-              <FormControlLabel value={"male"} control={<Radio />} label="Male" />
-              <FormControlLabel value={"other"} control={<Radio />} label="Other" />
-            </RadioGroup>
-          {errorGender ? <FormHelperText>You can display an error</FormHelperText> : null}
-        </FormControl>
-        <FormControl>
-          <FormLabel component="legend">Race</FormLabel>
-            <FormGroup aria-label="race" name="race1" value={this.state.race}>
-              <FormControlLabel
-                control={<Checkbox checked={this.state.race.includes("white") ? true : false} onChange={this.handleRace} value="white"/>}
-                label="White (non-Hispanic or Latinx)"
-              />
-              <FormControlLabel
-                control={<Checkbox checked={this.state.race.includes("black") ? true : false} onChange={this.handleRace} value="black" />}
-                label="Black"
-              />
-              <FormControlLabel
-                control={<Checkbox checked={this.state.race.includes("asian") ? true : false} onChange={this.handleRace} value="asian" />}
-                label="Asian or Pacific Islander"
-              />
-              <FormControlLabel
-                control={<Checkbox checked={this.state.race.includes("latinx") ? true : false} onChange={this.handleRace} value="latinx" />}
-                label="Hispanic or Latinx"
-              />
-            </FormGroup>
-        </FormControl>
-        <Button onClick={this.next_page.bind(this)}>
-          Submit
-        </Button>
+        { this.state.page === 0 ? (
+          <Container>
+            <Typography variant="body1">
+              Background Information
+            </Typography>
+            <FormControl>
+              <FormLabel component="legend">Gender</FormLabel>
+                <RadioGroup aria-label="gender" name="gender1" value={this.state.gender} onChange={this.handleGender}>
+                  <FormControlLabel value={"female"} control={<Radio />} label="Female" />
+                  <FormControlLabel value={"male"} control={<Radio />} label="Male" />
+                  <FormControlLabel value={"other"} control={<Radio />} label="Other" />
+                </RadioGroup>
+              {errorGender ? <FormHelperText>You can display an error</FormHelperText> : null}
+            </FormControl>
+            <FormControl>
+              <FormLabel component="legend">Race</FormLabel>
+                <FormGroup aria-label="race" name="race1" value={this.state.race}>
+                  <FormControlLabel
+                    control={<Checkbox checked={this.state.race.includes("white") ? true : false} onChange={this.handleRace} value="white"/>}
+                    label="White (non-Hispanic or Latinx)"
+                  />
+                  <FormControlLabel
+                    control={<Checkbox checked={this.state.race.includes("black") ? true : false} onChange={this.handleRace} value="black" />}
+                    label="Black"
+                  />
+                  <FormControlLabel
+                    control={<Checkbox checked={this.state.race.includes("asian") ? true : false} onChange={this.handleRace} value="asian" />}
+                    label="Asian or Pacific Islander"
+                  />
+                  <FormControlLabel
+                    control={<Checkbox checked={this.state.race.includes("latinx") ? true : false} onChange={this.handleRace} value="latinx" />}
+                    label="Hispanic or Latinx"
+                  />
+                </FormGroup>
+            </FormControl>
+            <Button onClick={this.next_page.bind(this)}>
+              Next
+            </Button>
+          </Container>
+        ) : null}
+        {
+          this.state.page === 1 ? (
+            <Container>
+              <Typography variant="body1">
+                Instructions
+              </Typography>
+              <ol>
+                <li> You will be assessing skin color using the Fitzpatrick Skin Type scale (shown below).
+                Smaller numbers indicate paler skin and larger numbers indicate
+                darker skin. Try to not let illumination affect your judgement. </li>
+                <li> You will be assessing the perceived gender of individuals as either female, male, or other.
+                </li>
+              </ol>
+              <Typography variant="body1">
+                Examples
+              </Typography>
+              <Button onClick={this.next_page.bind(this)}>
+                Next
+              </Button>
+            </Container>
+          ) : null
+        }
+        {
+          this.state.page === 2 ? (
+            <Container>
+              <Typography variant="body1">
+                Getting Started
+              </Typography>
+              <Button onClick={this.submitTest.bind(this)}>
+                Submit
+              </Button>
+            </Container>
+          ) : null;
+        }
       </Container>
     );
   }
