@@ -40,6 +40,7 @@ def get_mturk_connection_from_args(args):
   Utility method to get an MTurkConnection from argparse args.
   """
   aws_access_key = args.config.get('aws_access_key')
+  print(aws_access_key)
   aws_secret_key = args.config.get('aws_secret_key')
   return get_mturk_connection(sandbox=args.sandbox,
                               aws_access_key=aws_access_key,
@@ -51,7 +52,7 @@ def get_mturk_connection(sandbox=True,
                          aws_secret_key=None,
                          region_name='us-east-1'):
   """
-  Get a boto mturk connection. This is a thin wrapper over boto3.client; 
+  Get a boto mturk connection. This is a thin wrapper over boto3.client;
   the only difference is a boolean flag to indicate sandbox or not.
   """
   kwargs = {}
@@ -80,11 +81,11 @@ def setup_qualifications(hit_properties, mtc):
   qual = []
   if 'QualificationId' in hit_properties and 'QualificationComparator' in hit_properties and 'QualificationInteger' in hit_properties:
     comparator = hit_properties['QualificationComparator']
-    if comparator == '>': 
+    if comparator == '>':
         c = 'GreaterThan'
-    elif comparator == '=': 
+    elif comparator == '=':
         c = 'EqualTo'
-    elif comparator == '<': 
+    elif comparator == '<':
         c = 'LessThan'
     else:
         print("The 'qualification comparator' is not one of the designated values ('<', '=', '>').")
