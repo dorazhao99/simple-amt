@@ -202,3 +202,6 @@ To launch HITs, you need both an HTML template defining the UI for the HIT and a
 - `QualificationId`: Optional. If you have assigned qualifications to some workers, then this is only allow those workers with this qualification id to work on your hits.
 - `QualificationComparator`: Optional. Must be one of `<`, `=`, or `>`. This helps decide whether you want the workers to have a qualification that is greater, equal or less than the `QualificationInteger`.
 - `QualificationInteger`: Optional. Must be an integer. The value used to threshold workers to be above, equal or below (determined by `QualificationComparator`).
+
+## Sources
+Template for HIT template comes from Kaiyu Yang. 
