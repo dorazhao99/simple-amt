@@ -99,9 +99,15 @@ const {
     Grid,
 } = MaterialUI;
 
-const attrs = {gender: ['Male', 'Female', 'Unsure'],
-               skin: ['1', '2', '3', '4', '5', '6', 'Unsure']
-             };
+const test_attrs = {
+  gender: ['Male', 'Female'],
+  skin: ['1', '2', '3', '4', '5', '6']
+};
+const attrs = {
+  gender: ['Male', 'Female', 'Unsure'],
+  skin: ['1', '2', '3', '4', '5', '6', 'Unsure']
+};
+
 class DemographyQuiz extends React.Component
 {
   constructor(props) {
@@ -113,6 +119,17 @@ class DemographyQuiz extends React.Component
     }
     this.handleGender = this.handleGender.bind(this);
     this.handleRace = this.handleRace.bind(this);
+    this.submitDemography = this.submitDemography.bind(this);
+  }
+
+  submitDemography = () => {
+    if (this.state.gender === null || this.state.race.length === 0) {
+      alert('Please complete the current questions before proceeding.');
+      return {};
+    } else {
+      this.props.aboutUser(this.state.gender, this.state.race)
+      this.setState({page: this.state.page + 1})
+    }
   }
 
   next_page() {
@@ -135,10 +152,6 @@ class DemographyQuiz extends React.Component
     this.setState({race: newRace});
   }
 
-  submitTest = () => {
-
-  }
-  
   render()
   {
     const errorGender = this.state.gender === null;
@@ -180,7 +193,7 @@ class DemographyQuiz extends React.Component
                   />
                 </FormGroup>
             </FormControl>
-            <Button onClick={this.next_page.bind(this)}>
+            <Button onClick={this.submitDemography.bind(this)}>
               Next
             </Button>
           </Container>
@@ -195,7 +208,7 @@ class DemographyQuiz extends React.Component
                 <li> You will be assessing skin color using the Fitzpatrick Skin Type scale (shown below).
                 Smaller numbers indicate paler skin and larger numbers indicate
                 darker skin. Try to not let illumination affect your judgement. </li>
-                <li> You will be assessing the perceived gender of individuals as either female, male, or other.
+                <li> You will be assessing the perceived gender of individuals as either female, male, or other / unsure.
                 </li>
               </ol>
               <Typography variant="body1">
@@ -210,14 +223,60 @@ class DemographyQuiz extends React.Component
         {
           this.state.page === 2 ? (
             <Container>
-              <Typography variant="body1">
-                Getting Started
-              </Typography>
-              <Button onClick={this.submitTest.bind(this)}>
-                Submit
-              </Button>
+              <Grid container spacing={3}>
+                  <Grid item xs={6}>
+                      <div>
+                        <Typography variant="body1" gutterBottom>
+                            <strong>Instructions</strong>
+                        </Typography>
+                        <ol>
+                            <li><Typography variant="body1" gutterBottom>
+                                Enter the gender and skin color information for the person in the bounding box.
+                                If the person is too small or unclear, mark "Unsure". </Typography></li>
+                        </ol>
+                      </div>
+                  </Grid>
+                  <Grid item xs={6}>
+                      <img src={this.props.url}/>
+                  </Grid>
+                  { Object.keys(test_attrs).map((k, idx) => {
+                      return (
+                        <FormControl key={k} fullWidth={true}>
+                          <FormGroup row={true}>
+                          { test_attrs[k].map(lbl =>
+                            <div key={lbl}>
+                              <FormControlLabel
+                                control={
+                                  <Radio
+                                    checked={false}
+                                    onChange={this.handleGender}
+                                    value={lbl}
+                                  />
+                                }
+                                label={lbl}
+                               />
+                            </div>
+                          )}
+                         </FormGroup>
+                        </FormControl>
+                      );
+                    })
+                  }
+              </Grid>
+              <Button> Submit </Button>
             </Container>
-          ) : null;
+          ) : null
+        }
+        {
+          this.state.page === 3 ? (
+            <Container>
+              <Typography variant="h3">
+                Thanks for your submission! 
+              </Typography>
+            </Container>
+          ) : (
+            null
+          )
         }
       </Container>
     );
@@ -243,17 +302,17 @@ class TabPanel extends React.Component
                               <strong>Instructions</strong>
                           </Typography>
                           <ol>
-                              <li><Typography variant="body1" gutterBottom>
-                                  Enter the gender and skin color information for the person in the bounding box.
-                                  If the person is too small or unclear, mark "Unsure". </Typography></li>
-                              <li><Typography variant="body1" gutterBottom>
-                                  Click "NEXT" to move onto the next HIT. You must submit
-                                  an answer to both questions per image otherwise
-                                  you will not be able to proceed.
-                                  </Typography></li>
-                              <li><Typography variant="body1" gutterBottom>
-                                  There are 10 questions per HIT.
-                                  </Typography></li>
+                            <li><Typography variant="body1" gutterBottom>
+                                Enter the gender and skin color information for the person in the bounding box.
+                                If the person is too small or unclear, mark "Unsure". </Typography></li>
+                            <li><Typography variant="body1" gutterBottom>
+                                Click "NEXT" to move onto the next HIT. You must submit
+                                an answer to both questions per image otherwise
+                                you will not be able to proceed.
+                                </Typography></li>
+                            <li><Typography variant="body1" gutterBottom>
+                                There are 10 questions per HIT.
+                                </Typography></li>
                           </ol>
                         </div>
                     </Grid>
@@ -481,14 +540,14 @@ class App extends React.Component
             }
             if (state.active_panel_idx < this.input_data.length - 1)
             {
-                // this.check_gt(state.active_panel_idx);
+                this.check_gt(state.active_panel_idx);
                 this.time.push((Date.now() - this.start_time) / 1000);
                 const updated_completed = state.completed.slice()
                 updated_completed[state.active_panel_idx] = true
                 return {active_panel_idx: state.active_panel_idx + 1, completed: updated_completed};
             } else
             {
-                // this.check_gt(state.active_panel_idx);
+                this.check_gt(state.active_panel_idx);
                 this.time.push((Date.now() - this.start_time) / 1000);
                 const annotations = JSON.parse(JSON.stringify(state));
                 delete annotations.completed;
@@ -576,6 +635,15 @@ class App extends React.Component
         });
     }
 
+    set_demography(gender, race)
+    {
+      this.setState({
+        annotator: {
+          race: race,
+          gender: gender,
+        },
+      })
+    }
 
     // set_keyboard(enable)
     // {
@@ -615,7 +683,9 @@ class App extends React.Component
                   />
               )) : (
                 <div>
-                  <DemographyQuiz/>
+                  <DemographyQuiz
+                    aboutUser={this.set_demography.bind(this)}
+                  />
                 </div>
               )
             }
