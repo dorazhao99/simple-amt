@@ -53,6 +53,25 @@ code {
   color: #61dafb;
 }
 
+.app-bar {
+  margin: 0 0 24px 0;
+}
+
+.form-container {
+  margin: 24px 0;
+}
+
+.radio-group {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -106,6 +125,10 @@ const test_attrs = {
 const attrs = {
   gender: ['Male', 'Female', 'Unsure'],
   skin: ['1', '2', '3', '4', '5', '6', 'Unsure']
+};
+const titles = {
+  gender: "What is the gender of the person in the bounding box?",
+  skin: "What is the skin color of the person in the bounding box?"
 };
 
 class DemographyQuiz extends React.Component
@@ -239,29 +262,6 @@ class DemographyQuiz extends React.Component
                   <Grid item xs={6}>
                       <img src={this.props.url}/>
                   </Grid>
-                  { Object.keys(test_attrs).map((k, idx) => {
-                      return (
-                        <FormControl key={k} fullWidth={true}>
-                          <FormGroup row={true}>
-                          { test_attrs[k].map(lbl =>
-                            <div key={lbl}>
-                              <FormControlLabel
-                                control={
-                                  <Radio
-                                    checked={false}
-                                    onChange={this.handleGender}
-                                    value={lbl}
-                                  />
-                                }
-                                label={lbl}
-                               />
-                            </div>
-                          )}
-                         </FormGroup>
-                        </FormControl>
-                      );
-                    })
-                  }
               </Grid>
               <Button> Submit </Button>
             </Container>
@@ -271,7 +271,7 @@ class DemographyQuiz extends React.Component
           this.state.page === 3 ? (
             <Container>
               <Typography variant="h3">
-                Thanks for your submission! 
+                Thanks for your submission!
               </Typography>
             </Container>
           ) : (
@@ -320,10 +320,12 @@ class TabPanel extends React.Component
                         <img src={this.props.url}/>
                     </Grid>
                 </Grid>
+                <Container className='form-container'>
                 { Object.keys(attrs).map((k, idx) => {
                     return (
                       <FormControl key={k} fullWidth={true}>
-                        <FormGroup row={true}>
+                        <Typography> {titles[k]} </Typography>
+                        <RadioGroup className="radio-group" row={true}>
                         { attrs[k].map(lbl =>
                           <div key={lbl}>
                             <FormControlLabel
@@ -336,23 +338,27 @@ class TabPanel extends React.Component
                               }
                               label={lbl}
                              />
-                            <img src={`https://imgamtserv.cs.princeton.edu/examples/${lbl}.jpg`}
-                              alt={lbl}
-                              onClick={() => this.props.check_label(k, lbl)} />
                           </div>
                         )}
-                       </FormGroup>
+                       </RadioGroup>
                       </FormControl>
                     );
                   }
                 )}
-              <Button onClick={this.props.prev.bind(this)} color="primary">
-                  Previous
-              </Button>
-              <Button onClick={this.props.next.bind(this)} color="primary">
-                  Next
-              </Button>
               </Container>
+              <Grid container spacing={3}>
+                <Grid xs={6}>
+                  <Button onClick={this.props.prev.bind(this)} variant="contained" color="primary">
+                      Previous
+                  </Button>
+                </Grid>
+                <Grid xs={6}>
+                  <Button onClick={this.props.next.bind(this)} variant="contained" color="primary">
+                      Next
+                  </Button>
+                </Grid>
+              </Grid>
+            </Container>
           );
         } else
         {
@@ -419,15 +425,8 @@ class App extends React.Component
         super(props)
 
         const SAMPLE_INPUT = [
-            {"image_url": "https://picsum.photos/id/237/200/300", "synset": "medical practitioner, medical man", "gloss": "someone who practices medicine", "gt": {"gender": ["male"], "skin": ["light"], "age": ["adult"]}},
-            {"image_url": "https://imgamtserv.cs.princeton.edu/n10780632/n10780632_24471.JPEG", "synset": "wife, married woman", "gloss": "a married woman; a man's partner in marriage", "gt": null},
-            {"image_url": "https://imgamtserv.cs.princeton.edu/n10521662/n10521662_7387.JPEG", "synset": "reporter, newsman, newsperson", "gloss": "a person who investigates and reports or edits news stories", "gt": null},
-            {"image_url": "https://imgamtserv.cs.princeton.edu/n09913593/n09913593_6229.JPEG", "synset": "cheerleader", "gloss": "an enthusiastic and vocal supporter; \"he has become a cheerleader for therapeutic cloning\"", "gt": null},
-            {"image_url": "https://imgamtserv.cs.princeton.edu/n10147935/n10147935_29664.JPEG", "synset": "groom, bridegroom", "gloss": "a man who has recently been married", "gt": null},
-            {"image_url": "https://imgamtserv.cs.princeton.edu/n09618880/n09618880_3115.JPEG", "synset": "ex-president", "gloss": "a former president", "gt": null}, {"image_url": "https://imgamtserv.cs.princeton.edu/n10655594/n10655594_16783.JPEG", "synset": "steward, flight attendant", "gloss": "an attendant on an airplane", "gt": null},
-            {"image_url": "https://imgamtserv.cs.princeton.edu/n10333601/n10333601_4426.JPEG", "synset": "mother's daughter", "gloss": "a daughter who is favored by and similar to her mother", "gt": null},
-            {"image_url": "https://imgamtserv.cs.princeton.edu/n10348526/n10348526_3059.JPEG", "synset": "Navy SEAL, SEAL", "gloss": "a member of a Naval Special Warfare unit who is trained for unconventional warfare; \"SEAL is an acronym for Sea Air and Land\"", "gt": null},
-            {"image_url": "https://imgamtserv.cs.princeton.edu/n10382710/n10382710_8784.JPEG", "synset": "organ-grinder", "gloss": "a street musician who plays a hand organ or hurdy-gurdy", "gt": null},];
+            {"image_url": "https://picsum.photos/id/237/200/300", "synset": "medical practitioner, medical man", "gloss": "someone who practices medicine", "gt": {"gender": "Male", "skin": "3"}},
+            {"image_url": "https://imgamtserv.cs.princeton.edu/n10780632/n10780632_24471.JPEG", "synset": "wife, married woman", "gloss": "a married woman; a man's partner in marriage", "gt": null}];
         this.simpleamt = new SimpleAMT();
         this.input_data = this.simpleamt.get_input(SAMPLE_INPUT);
         console.log(JSON.stringify(this.input_data));
@@ -452,7 +451,7 @@ class App extends React.Component
                 skin: [],
             })),
             completed: this.input_data.map(() => false),
-            beginTask: false,
+            beginTask: true,
         };
         this.time = [];
 
@@ -460,20 +459,12 @@ class App extends React.Component
 
     reformat(annotations)
     {
-        const keys = Object.keys(annotations);
-        const length = annotations[keys[0]].length;
-        Object.values(annotations).forEach(arr => {
-            console.assert(arr.length === length);
-        });
+        const labels = annotations['labels'];
+        const length = labels.length;
         const results = [];
         for (let i = 0; i < length; i++)
         {
-            const obj = {};
-            for (let k of keys)
-            {
-                obj[k] = annotations[k][i];
-            }
-            results.push(obj);
+            results.push(labels[i]);
         }
         return results;
     }
@@ -486,19 +477,11 @@ class App extends React.Component
         }
         for (let k of Object.keys(attrs))
         {
-            this.state.labels[idx][k].sort();
-            this.input_data[idx].gt[k].sort();
             if (JSON.stringify(this.state.labels[idx][k]) != JSON.stringify(this.input_data[idx].gt[k]))
             {
                 const your_answer = `You answer: ${JSON.stringify(this.state.labels[idx])}\n`;
                 let reference_answer = null;
-                if (this.input_data[idx].gt.gender.length === 0)  // no person
-                {
-                    reference_answer = `However, it is not obvious from the image that the person is a ${this.input_data[idx].synset}.`;
-                } else
-                {
-                    reference_answer = `The reference answer: ${JSON.stringify(this.input_data[idx].gt)}\n`;
-                }
+                reference_answer = `The reference answer: ${JSON.stringify(this.input_data[idx].gt)}\n`;
                 alert(your_answer + reference_answer + 'You are not required to be always the same to the reference, but please ajust your labeling criterion to match the reference as close as possible.');
                 return;
             }
@@ -507,9 +490,10 @@ class App extends React.Component
 
     sanity_check()  // some simple check of the results to submit
     {
-        const no_person = this.state.labels.filter(lbs => lbs['gender'].length === 0 && lbs['skin'].length === 0 && lbs['age'].length === 0);
-        console.log(no_person);
-        if (no_person.length > this.input_data.length / 2)
+        debugger;
+        const unsure = this.state.labels.filter(lbs => lbs['gender'] === 'Unsure' && lbs['skin'] === 'Unsure');
+        console.log(unsure);
+        if (unsure.length > this.input_data.length / 2)
         {
             return false;
         }
@@ -520,7 +504,6 @@ class App extends React.Component
     {
         let isComplete = false;
         let count = 0;
-        debugger;
         Object.keys(this.state.labels[this.state.active_panel_idx]).forEach((lbl) => {
           if (this.state.labels[this.state.active_panel_idx][lbl].length > 0) {
             count += 1;
@@ -553,6 +536,7 @@ class App extends React.Component
                 delete annotations.completed;
                 delete annotations.active_panel_idx;
                 annotations.time = this.time;
+                debugger;
                 const results = {'input': this.input_data, 'output': this.reformat(annotations)};
                 console.log(JSON.stringify(results));
                 this.simpleamt.set_output(results);
@@ -660,7 +644,7 @@ class App extends React.Component
     {
         return (
           <div className="App">
-            <AppBar position="static">
+            <AppBar className="app-bar" position="static">
               <Tabs
                 variant="fullWidth"
                 value={this.state.active_panel_idx}
@@ -668,27 +652,27 @@ class App extends React.Component
                 { this.input_data.map((sample, idx) =>
                     <Tab key={idx} label={idx + 1} />) }
               </Tabs>
-              </AppBar>
-              {this.state.beginTask ? (
-                this.input_data.map((sample, idx) =>
-                  <TabPanel
-                      key={idx}
-                      value={this.state.active_panel_idx}
-                      index={idx}
-                      url={this.input_data[idx].image_url}
-                      next={this.next_panel.bind(this)}
-                      prev={this.prev_panel.bind(this)}
-                      labels={this.state.labels[idx]}
-                      check_label={this.handle_check_label.bind(this, idx)}
-                  />
-              )) : (
-                <div>
-                  <DemographyQuiz
-                    aboutUser={this.set_demography.bind(this)}
-                  />
-                </div>
-              )
-            }
+            </AppBar>
+            {this.state.beginTask ? (
+              this.input_data.map((sample, idx) =>
+                <TabPanel
+                    key={idx}
+                    value={this.state.active_panel_idx}
+                    index={idx}
+                    url={this.input_data[idx].image_url}
+                    next={this.next_panel.bind(this)}
+                    prev={this.prev_panel.bind(this)}
+                    labels={this.state.labels[idx]}
+                    check_label={this.handle_check_label.bind(this, idx)}
+                />
+            )) : (
+              <div>
+                <DemographyQuiz
+                  aboutUser={this.set_demography.bind(this)}
+                />
+              </div>
+            )
+          }
           </div>
         );
     }
